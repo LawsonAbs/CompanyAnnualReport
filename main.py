@@ -72,7 +72,7 @@ def single_page(page_num,date):
 parameters:
 1. single_page: 单个页面中的信息
 """
-def download(single_page,year): #下载年报
+def download(single_page,year,logger): #下载年报
     try:
         headers= {'Accept': 'application/json, text/javascript, */*; q=0.01',
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -85,20 +85,26 @@ def download(single_page,year): #下载年报
             #print(i)
             title = i['announcementTitle']
             aim_1 = year+"年年度报告(更新后)"
-            aim_2 = year+"年年度报告"
-            if title == aim_1 or title == aim_2:
+            aim_2 = year+"年年度报告（更新后）" 
+            aim_3 = year+"年年度报告"
+            if title == aim_1 or title == aim_2 or title == aim_3:
                 url='http://www.cninfo.com.cn/new/announcement/download?bulletinId=' + i['announcementId']+'&announceTime='+i['adjunctUrl'][10:20]
                 name= i["secCode"]+ '_' + i['secName']+ '_' + i['announcementTitle']+ '.pdf'
 
                 if '*' in name:
                     name= name.replace('*','')
-                file_path= saving_path+ name
+                file_path= saving_path+year+"/"+name
                 time.sleep(random.random()* 2)
                 headers['User-Agent']= random.choice(User_Agent)
                 r = requests.get(url,headers = headers)
+                
+                # 如果不存在这个路径
+                if not os.path.exists(os.path.dirname(file_path)):
+                    os.mkdir(os.path.dirname(file_path))
+
                 with open(file_path,'wb') as f:                
-                    f.write(r.content)                    
-                    print(f"{name}下载成功")
+                    f.write(r.content)
+                    logger.info(f"{name}下载成功")
             else:
                 continue
     except:        
@@ -107,17 +113,20 @@ def download(single_page,year): #下载年报
 
 if __name__ == '__main__':
     # step1. 构造时间区域
-    #date_range = ['2016-01-01~2016-04-30','2017-01-01~2017-04-30','2018-01-01~2018-04-30','2019-01-01~2019-04-30','2021-01-01~2021-04-30']
-    date_range = ['2019-01-01~2019-04-30','2021-01-01~2021-04-30']
-    # step2. 构建日志记录器
-    log_name = "log"
-    logging.basicConfig(level=logging.INFO,
-                        filemode='w',
-                        filename="./"+log_name)
+    #date_range = ['2011-01-01~2011-04-30','2012-01-01~2012-04-30','2013-01-01~2013-04-30','2014-01-01~2014-04-30']
+    date_range = ['2014-01-01~2014-04-30']
+    
     logger = logging.getLogger(__name__)
     for date in date_range:
-        for cur_page in range(1010):
+        year = str(int(date.split("-")[0]) - 1) # 得到年份
+        log_filename = year+".log" # 得到每个年份的日志
+        # step2. 构建日志记录器
+        logging.basicConfig(level=logging.INFO,
+                        filemode='w',
+                        filename="./log/"+log_filename)
+        logger = logging.getLogger(year)
+        for cur_page in range(10,101):
             logger.info(f"当前正在进行的时间段是：{date},当前的访问页是：{cur_page}")
             page_data= single_page(cur_page,date) # page_data
-            year = str(int(date.split("-")[0]) - 1) # 得到年份            
-            download(page_data,year)
+
+            download(page_data,year,logger)
