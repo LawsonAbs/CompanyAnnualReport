@@ -81,13 +81,15 @@ def download(single_page,year,logger): #下载年报
         'Host': 'www.cninfo.com.cn',
         'Origin': 'http://www.cninfo.com.cn'
         }
-        for i in single_page:
-            #print(i)
+        suc = 0 # 下载成功的数目
+        for i in single_page:            
             title = i['announcementTitle']
             aim_1 = year+"年年度报告(更新后)"
             aim_2 = year+"年年度报告（更新后）" 
-            aim_3 = year+"年年度报告"
-            if title == aim_1 or title == aim_2 or title == aim_3:
+            aim_3 = year+"年年度报告"            
+            if ((title == aim_1 or title == aim_2 or title == aim_3)
+                #and (title.endswith(aim_1) or title.endswith(aim_2) or title.endswith(aim_3))                
+                ):
                 url='http://www.cninfo.com.cn/new/announcement/download?bulletinId=' + i['announcementId']+'&announceTime='+i['adjunctUrl'][10:20]
                 name= i["secCode"]+ '_' + i['secName']+ '_' + i['announcementTitle']+ '.pdf'
 
@@ -105,16 +107,19 @@ def download(single_page,year,logger): #下载年报
                 with open(file_path,'wb') as f:                
                     f.write(r.content)
                     logger.info(f"{name}下载成功")
-            else:
-                continue
-    except:        
+                    suc += 1        
+    except:                
         pass
-
+    finally: # 保证返回成功的个数
+        return suc
 
 if __name__ == '__main__':
     # step1. 构造时间区域
-    #date_range = ['2011-01-01~2011-04-30','2012-01-01~2012-04-30','2013-01-01~2013-04-30','2014-01-01~2014-04-30']
-    date_range = ['2014-01-01~2014-04-30']
+    # 下面这个特殊的时间区域都是根据页面查看得到的
+    date_range = ['2011-01-01~2011-03-21','2012-01-01~2012-03-27','2013-01-01~2013-03-29','2014-01-01~2014-03-28']
+    #date_range = ['2015-01-01~2015-03-30','2016-01-01~2016-04-08','2017-01-01~2017-04-14','2018-01-01~2018-04-19']
+    #date_range = ['2019-01-01~2019-04-23','2020-01-01~2020-04-26']
+    
     
     logger = logging.getLogger(__name__)
     for date in date_range:
@@ -125,8 +130,11 @@ if __name__ == '__main__':
                         filemode='w',
                         filename="./log/"+log_filename)
         logger = logging.getLogger(year)
-        for cur_page in range(10,101):
+        for cur_page in range(1,101):
             logger.info(f"当前正在进行的时间段是：{date},当前的访问页是：{cur_page}")
             page_data= single_page(cur_page,date) # page_data
-
-            download(page_data,year,logger)
+            cnt = 0
+            suc = download(page_data,year,logger)
+            cnt += suc
+            if cnt > 800:
+                break
