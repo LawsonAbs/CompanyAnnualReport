@@ -20,6 +20,7 @@ key_word_map 是非累积map
 def analysis(pdf_file_path,key_word_map, key_word_map_accumulate):
     try:
         text = extract_text(pdf_file_path)
+        text = text.replace("\n","") # 将所有的换行转成空白部分
     except:
         text = []
         print(f"解析{pdf_file_path}文件出现异常")
@@ -51,7 +52,7 @@ def analysis(pdf_file_path,key_word_map, key_word_map_accumulate):
 if __name__ == "__main__":
     file_path = "/home/lawson/program/CompanyAnnualReport/report/"
     res_path = "/home/lawson/program/CompanyAnnualReport/result/"
-    for year in range(2016,2018):
+    for year in range(2013,2014):
         print(f"开始分析第{year}年的数据")
         key_word_map = {}
         key_word_map_accumulate = {}
