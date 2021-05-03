@@ -27,7 +27,7 @@ def analysis(pdf_file_path,key_word_map, key_word_map_accumulate):
         return
     for word in key_words:
         cnt = text.count(word)
-        if cnt > 1:
+        if cnt >= 1:
             if word not in key_word_map.keys():
                 key_word_map[word] = 1
             else :
@@ -52,7 +52,7 @@ def analysis(pdf_file_path,key_word_map, key_word_map_accumulate):
 if __name__ == "__main__":
     file_path = "/home/lawson/program/CompanyAnnualReport/report/"
     res_path = "/home/lawson/program/CompanyAnnualReport/result/"
-    for year in range(2013,2014):
+    for year in range(2010,2011):
         print(f"开始分析第{year}年的数据")
         key_word_map = {}
         key_word_map_accumulate = {}
