@@ -1,3 +1,4 @@
+import copy
 from pdfminer.high_level import extract_text
 import json
 import xlwt
@@ -18,11 +19,15 @@ def anslysis_log2_xls(file_path):
         pre_value_acc = 0
         cur_value_acc = 0 # # key_word_map_acc 中的值
         res = [] # 存储最后的结果        
-        start = 1
+        pre_key_word_map_acc = {}  #上一次的累计值
+        key_word_difference_value = {}
+        cur_key_map_acc = {'一带一路': 0, '供给侧': 0, '八项规定': 0, '利率市场化': 0, '反腐败': 0, '和谐社会': 0, '国内生产总值': 0, '国际经济': 0,'非公有制经济':0,'国内外经济形势':0,'宏观调控':0,'国民经济':0,'货币政策':0,'通货膨胀':0,'国际经济环境':0,'结构性改革':0,
+        '中国制造“2025”':0,'京津冀协同发展':0,'海上丝绸之路':0,'产能过剩':0,'亚太自贸区':0,'长江经济带':0,'混合所有制经济':0,
+        '利率市场化':0,'高质量发展':0,'美丽中国':0,'经济合作区':0 } 
         while(line):
             line = f.readline()
             line = line.strip("\n")
-            #print(line)
+            # print(line)
             if line.startswith("key_word_map={"):
                 line = line.replace("key_word_map=","")
                 line = line.replace("\'","\"")
@@ -35,11 +40,14 @@ def anslysis_log2_xls(file_path):
                 line = line.replace("key_word_map_accumulate=","")
                 line = line.replace("\'","\"")
                 # print(line)
+                
+                pre_key_word_map_acc = cur_key_map_acc.copy()
                 cur_key_map_acc = json.loads(line)
                 for item in cur_key_map_acc.items():
                     key,value =item
-                    cur_value_acc += value
-                res.append([cur_report_name,cur_value-pre_value,cur_value_acc-pre_value_acc])
+                    cur_value_acc += value                    
+                    key_word_difference_value[key] = cur_key_map_acc[key] - pre_key_word_map_acc[key]                    
+                res.append([cur_report_name,cur_value-pre_value,cur_value_acc-pre_value_acc,key_word_difference_value.copy()])
                 pre_value = cur_value
                 cur_value = 0
                 pre_value_acc = cur_value_acc
@@ -58,16 +66,19 @@ def anslysis_log2_xls(file_path):
                     sheet = xls.add_sheet(sheetname='sheet1',cell_overwrite_ok=True)
                     row = 0   #在excel开始写的位置（y）
                     column = 0
-                    row = 0
-                    sheet.write(row,column,"公司名称")
-                    column = 1 
-                    sheet.write(row,column,"是否出现")    
-                    column = 2            
-                    sheet.write(row,column,"出现次数累计")
-                    row+=1 #另起一行                    
-                    for cont in res :     #循环读取文本里面的内容
-                        for column in range(len(cont)):
+                    
+                    head = ["公司名称",'是否出现','出现次数累计','一带一路', '供给侧', '八项规定', '利率市场化', '反腐败', '和谐社会', '国内生产总值', '国际经济','非公有制经济','国内外经济形势','宏观调控','国民经济','货币政策','通货膨胀','国际经济环境','结构性改革','中国制造“2025”','京津冀协同发展','海上丝绸之路','产能过剩','亚太自贸区','长江经济带','混合所有制经济','利率市场化','高质量发展','美丽中国','经济合作区']
+                    for column in range(len(head)):
+                        sheet.write(row,column,head[column])
+
+                    row+=1 #另起一行
+                    for cont in res :     #循环读取文本里面的内容                        
+                        for column in range(0,len(cont)-1):
                             sheet.write(row,column,cont[column])
+                        temp_dict = cont[3]                        
+                        for column in range(3,len(head)):
+                            sheet.write(row,column,temp_dict[head[column]])
+                            column += 1
                         row += 1
                     xls.save(out_path)        #保存为xls文件
                 except:
@@ -131,6 +142,6 @@ def test_123(pdf_file_path):
 
 
 if __name__ == "__main__":    
-    file_path = './log_1300/analysis_14.log'
-    #anslysis_log2_xls(file_path)
-    test_123('./000410_沈阳机床_2014年年度报告.pdf')
+    file_path = './analysis_11.log'
+    anslysis_log2_xls(file_path)
+    #test_123('./000410_沈阳机床_2014年年度报告.pdf')
