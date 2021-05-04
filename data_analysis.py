@@ -5,7 +5,11 @@ import logging
 import os
 from utils import get_key_words
 from pdfminer.high_level import extract_text
+import argparse
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--year",type=int)
 # pdf_file_path = "./勉刘申.pdf"
 # text = extract_text(pdf_file=pdf_file_path)
 # print(text)
@@ -48,41 +52,44 @@ def analysis(pdf_file_path,key_word_map, key_word_map_accumulate):
 #                 )
 # logg = logging.getLogger("analysis")
 
+args = parser.parse_args()
+
 
 if __name__ == "__main__":
     file_path = "/home/lawson/program/CompanyAnnualReport/report/"
     res_path = "/home/lawson/program/CompanyAnnualReport/result/"
-    for year in range(2010,2011):
-        print(f"开始分析第{year}年的数据")
-        key_word_map = {}
-        key_word_map_accumulate = {}
-        cur_path = file_path + str(year)
-        cur_res_file = res_path + str(year) +".txt"
-        cur_res_file_accumulate = res_path + str(year) +"_accumulate.txt"
+    year = args.year
 
-        #print(cur_path)
-        lists = os.listdir(cur_path)
-        for name in lists:
-            cur_file_name = cur_path +"/"+ name
-            print(cur_file_name)
-            analysis(cur_file_name,key_word_map,key_word_map_accumulate)
-            print(f"key_word_map={key_word_map}")
-            print(f"key_word_map_accumulate={key_word_map_accumulate}")
-        print(f"第{year}年的数据分析已结束")
+    print(f"开始分析第{year}年的数据")
+    key_word_map = {}
+    key_word_map_accumulate = {}
+    cur_path = file_path + str(year)
+    cur_res_file = res_path + str(year) +".txt"
+    cur_res_file_accumulate = res_path + str(year) +"_accumulate.txt"
 
-        print(f"将结果写入到文件中...")
-        # 写入非累积结果
-        with open(cur_res_file,'a') as f:
-            f.write(f"下面是第{year}年的结果")
-            for item in key_word_map.items():
-                key,value = item
-                f.write(key+"\t"+str(value)+"\n")
-            f.write("\n")
+    #print(cur_path)
+    lists = os.listdir(cur_path)
+    for name in lists:
+        cur_file_name = cur_path +"/"+ name
+        print(cur_file_name)
+        analysis(cur_file_name,key_word_map,key_word_map_accumulate)
+        print(f"key_word_map={key_word_map}")
+        print(f"key_word_map_accumulate={key_word_map_accumulate}")
+    print(f"第{year}年的数据分析已结束")
 
-        # 写入累积结果
-        with open(cur_res_file_accumulate,'a') as f:
-            f.write(f"下面是第{year}年的结果")
-            for item in key_word_map_accumulate.items():
-                key,value = item
-                f.write(key+"\t"+str(value)+"\n")
-            f.write("\n")
+    print(f"将结果写入到文件中...")
+    # 写入非累积结果
+    with open(cur_res_file,'a') as f:
+        f.write(f"下面是第{year}年的结果")
+        for item in key_word_map.items():
+            key,value = item
+            f.write(key+"\t"+str(value)+"\n")
+        f.write("\n")
+
+    # 写入累积结果
+    with open(cur_res_file_accumulate,'a') as f:
+        f.write(f"下面是第{year}年的结果")
+        for item in key_word_map_accumulate.items():
+            key,value = item
+            f.write(key+"\t"+str(value)+"\n")
+        f.write("\n")
