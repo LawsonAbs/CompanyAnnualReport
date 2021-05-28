@@ -140,8 +140,22 @@ def test_123(pdf_file_path):
     print(cnt)
     
 
+"""
+删除无用的文件
+"""
+def delete_invalid_file(file_path):
+    with open(file_path,'r') as f:
+        line = f.readline()
+        
+        while(line):
+            line = line.strip()
+            if line!="" and os.path.exists(line):
+                os.remove(line)
+            line = f.readline()    
+
 
 if __name__ == "__main__":    
-    file_path = './analysis_11.log'
+    file_path = './analysis_20_part_1.log'
     anslysis_log2_xls(file_path)
-    #test_123('./000410_沈阳机床_2014年年度报告.pdf')
+    # file_path = './a.txt'
+    # delete_invalid_file(file_path)
