@@ -100,26 +100,42 @@ def get_key_words():
 
 #file_affilication = open('Affiliations.txt','r')
  
- 
-def txt2_xls(file_path,xlsname):
-    xls = xlwt.Workbook()
+
+'''
+将统计的字数结果写入文件
+'''
+def txt2_xls(file_path,xls_name):    
     try:
-        for year in range(2010,2020):
-            file_name = file_path + "/" + str(year) + "_accumulate.txt"
-            f = open(file_name)            
+        for year in range(2010,2021):
+            xls = xlwt.Workbook()
+            file_name = file_path + "/" + str(year) + "_part.txt"
+            xls_name = file_path + "/" + str(year) + "_part.xls"
+            f = open(file_name)
             #生成excel的方法，声明excel
             sheet_name = str(year)
             sheet = xls.add_sheet(sheetname=sheet_name,cell_overwrite_ok=True)
             x = 0   #在excel开始写的位置（y）
+            line = f.readline() # 过滤第一行
             line = f.readline()
-            while(line):     #循环读取文本里面的内容            
-                for i in range(len(line.split('\t'))):   #\t即tab健分隔
-                    item = line.split('\t')[i]
-                    sheet.write(x,i,item)      #x单元格经度，i单元格纬度
+            line = line.strip("\n")
+            while(line): #循环读取文本里面的内容                   
+                left,right = line.split('\t')
+                right = int(right)
+                if right > 20000 or right < 500:
+                    line = f.readline()     #一行一行的读
+                    line = line.strip("\n")
+                    continue
+                sheet.write(x,0,left)      #x单元格经度，i单元格纬度
+                sheet.write(x,1,right)      #x单元格经度，i单元格纬度
+                
+                # for i in range(len(line.split('\t'))):   #\t即tab健分隔                    
+                #     item = line.split('\t')[i]
+                #     sheet.write(x,i,item)      #x单元格经度，i单元格纬度
                 x += 1  #另起一行
                 line = f.readline()     #一行一行的读
-        f.close()
-        xls.save(xlsname)        #保存为xls文件
+                line = line.strip("\n")
+            f.close()
+            xls.save(xls_name)        #保存为xls文件
     except:
         raise
     
@@ -154,8 +170,10 @@ def delete_invalid_file(file_path):
             line = f.readline()    
 
 
-if __name__ == "__main__":    
-    file_path = './analysis_20_part_1.log'
-    anslysis_log2_xls(file_path)
+if __name__ == "__main__":        
+    file_path = '/home/lawson/program/CompanyAnnualReport/result'
+    xls_name = '/home/lawson/program/CompanyAnnualReport/result'
+    # anslysis_log2_xls(file_path)
     # file_path = './a.txt'
     # delete_invalid_file(file_path)
+    txt2_xls(file_path,xls_name)
