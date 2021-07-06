@@ -2,6 +2,7 @@
 功能：对pdf的文件进行一个数据分析
 """
 import copy
+import xlwt
 import logging
 import os
 from utils import get_key_words
@@ -168,14 +169,23 @@ def reverse_analysis(text,cur_key_word,next_key_word):
 -4 表示其它问题
 """
 # 分析部分数据，主要是："董事会报告"，“管理层讨论与分析”，“经营情况讨论与分析” 三个中的一个
-def part_analysis(pdf_file_path):
+def part_analysis(pdf_file_path):    
+    acc_key_map = {'国内生产总值': 0, '反腐败': 0, '八项规定': 0, '高质量发展': 0, '供给侧': 0, 
+                '和谐社会': 0, '美丽中国': 0, '国际经济': 0, '非公有制经济': 0, '国内外经济形势': 0, 
+                '宏观调控': 0, '国民经济': 0, '货币政策': 0, '通货膨胀': 0, '国际经济环境': 0, '结构性改革': 0,
+                 '中国制造“2025”': 0, '一带一路': 0, '京津冀协同发展': 0, '海上丝绸之路': 0, '产能过剩': 0, 
+                 '亚太自贸区': 0, '长江经济带': 0, '混合所有制经济': 0, '经济合作区': 0, '利率市场化': 0,
+                 'RCEP':0,'碳中和':0,'国企改革三年行动':0,'产业升级':0,'智能制造':0,'数字经济':0
+                 } # 累计，最后必须要返回的项
+    
+    key_num = 0 # 出现过的关键字的个数
     try:
         text = extract_text(pdf_file_path)
         raw_text = copy.copy(text)
     except:
         text = []
         print(f"解析{pdf_file_path}文件出现异常")
-        return -1
+        return -1,key_num,acc_key_map
     
     try:
         # 提取出目录内容
@@ -274,18 +284,20 @@ def part_analysis(pdf_file_path):
             print(catalog)
             if len(catalog) < 5:  # 就是没有目录的pdf              
                 if cur_key_word_2 == "" or next_key_word_2 =="":
-                    return -3
-                else:
-                    return reverse_analysis(raw_text,cur_key_word_2,next_key_word_2)
+                    return -3,key_num,acc_key_map
+                # else:
+                #     return reverse_analysis(raw_text,cur_key_word_2,next_key_word_2)
         else:
             print(catalog)
             text = text[2500::] #取剩下的部分
         text = text.replace("\n","")
         if cur_key_word == '' or next_key_word=='':
             if cur_key_word_2 == "" or next_key_word_2 =="":                
-                return -3
-            else:
-                return reverse_analysis(raw_text,cur_key_word_2,next_key_word_2)
+                return -3,key_num,acc_key_map
+            # else:
+            #     return reverse_analysis(raw_text,cur_key_word_2,next_key_word_2)
+        if text.count(cur_key_word) > 1 or text.count(next_key_word) > 1:
+            return -5,key_num,acc_key_map # 如果不符合条件，则直接返回【采取较为严格的条件】
         index_1 = text.index(cur_key_word)
         index_2 = text.index(next_key_word)
         while index_1 + 100 >= index_2 : # 必须超过一定的阈值范围
@@ -312,8 +324,15 @@ def part_analysis(pdf_file_path):
             aim_part = aim_part.replace(i,"") # 将所有的符号替换掉
     except:
         print("提取内容遇到问题...")
-        return -4
-    return len(aim_part)
+        return -4,key_num,acc_key_map
+    # 接着对part部分的内容进行分析
+    key_words_map = []    
+    for key in key_words: 
+        num = aim_part.count(key)
+        if num > 0 :
+            key_num += 1
+            acc_key_map[key] = num
+    return len(aim_part),key_num,acc_key_map
 
 
 # log_filename = "analysis.log" # 得到每个年份的日志
@@ -367,13 +386,15 @@ if __name__ == "__main__":
     #     f.write("\n")
 
 
-    # part_2
+    # part_2  => 分析每个报表中管理层的字数信息，以及指定部分包含的关键字
     file_path = "/home/lawson/program/CompanyAnnualReport/report/"
     res_path = "/home/lawson/program/CompanyAnnualReport/result/"
     year = args.year
 
     print(f"开始分析第{year}年的数据")
     word_map = {} # name => num
+    all_key_num = [] 
+    all_acc_key_map = [] # 所有有效分析结果文件的累计
     cur_path = file_path + str(year)
     cur_res_file = res_path + str(year) +"_part.txt"
     
@@ -383,16 +404,42 @@ if __name__ == "__main__":
     for name in lists:
         cur_file_name = cur_path +"/"+ name
         print(cur_file_name)
-        word_num = part_analysis(cur_file_name)
+        word_num,key_num,acc_key_map = part_analysis(cur_file_name)
+        if word_num > 20000 or word_num < 500:
+            continue
         word_map[name] = word_num
+        all_key_num.append(key_num)
+        all_acc_key_map.append(acc_key_map)
 
     print(f"第{year}年的数据分析已结束")
 
-    print(f"将结果写入到文件中...")
+    print(f"将结果写入到xls文件中...")
     # 写入非累积结果
-    with open(cur_res_file,'w') as f:
-        f.write(f"下面是第{year}年的结果")
-        for item in word_map.items():
-            key,value = item
-            f.write(key+"\t"+str(value)+"\n")
-        f.write("\n")
+    # 直接将结果写成xls文件
+    xls = xlwt.Workbook()
+    xls_name = res_path + "/" + str(year) + ".xls"
+
+    #生成excel的方法，声明excel
+    sheet_name = str(year)
+    sheet = xls.add_sheet(sheetname=sheet_name,cell_overwrite_ok=True)
+    head = ["公司名称","字数统计",'是否出现','一带一路', '供给侧', '八项规定', '利率市场化', '反腐败', '和谐社会', '国内生产总值', '国际经济','非公有制经济','国内外经济形势','宏观调控','国民经济','货币政策','通货膨胀','国际经济环境','结构性改革','中国制造“2025”','京津冀协同发展','海上丝绸之路','产能过剩','亚太自贸区','长江经济带','混合所有制经济','利率市场化','高质量发展','美丽中国','经济合作区','RCEP','碳中和','国企改革三年行动','产业升级','智能制造','数字经济']
+    row = 0            
+    for column in range(len(head)):
+        sheet.write(row,column,head[column])
+    
+    index = 0
+    for item in word_map.items():
+        company_name,length = item            
+        key_num = all_key_num[index]
+        cur_acc_key_map = all_acc_key_map[index]
+        index+=1
+    
+        row+=1   #在excel开始写的位置（y）
+        sheet.write(row,0,company_name)      #x单元格经度，i单元格纬度
+        sheet.write(row,1,length)      #x单元格经度，i单元格纬度
+        sheet.write(row,2,key_num)
+        cnt = 1
+        for key in head[3::]: # 写入非累计            
+            sheet.write(row,2+cnt,cur_acc_key_map[key])
+            cnt += 1
+    xls.save(xls_name)        #保存为xls文件
