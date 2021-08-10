@@ -5,6 +5,10 @@ import xlwt
 import os 
 import sys
 
+
+"""
+根据日志文件将结果写到xls文件中
+"""
 def anslysis_log2_xls(file_path):
     with open(file_path,'r') as f:
         line = f.readline()
@@ -92,13 +96,14 @@ def anslysis_log2_xls(file_path):
 
 
 def get_key_words():
-    key_words_text="国内生产总值、反腐败、八项规定、高质量发展、供给侧、和谐社会、美丽中国、国际经济、非公有制经济、国内外经济形势、宏观调控、国民经济、货币政策、通货膨胀、国际经济环境、结构性改革、中国制造“2025”、一带一路、京津冀协同发展、海上丝绸之路、产能过剩、亚太自贸区、长江经济带、混合所有制经济、经济合作区、利率市场化、RCEP、碳中和、国企改革三年行动、产业升级、智能制造、数字经济"
+    # 下面这个关键字是王老师+岑岑师姐做的
+    # key_words_text="国内生产总值、反腐败、八项规定、高质量发展、供给侧、和谐社会、美丽中国、国际经济、非公有制经济、国内外经济形势、宏观调控、国民经济、货币政策、通货膨胀、国际经济环境、结构性改革、中国制造“2025”、一带一路、京津冀协同发展、海上丝绸之路、产能过剩、亚太自贸区、长江经济带、混合所有制经济、经济合作区、利率市场化、RCEP、碳中和、国企改革三年行动、产业升级、智能制造、数字经济"
+
+    # 下面这个关键字是岑岑师姐自己制定的
+    key_words_text = "数字化、数字经济、产业数字化、数字产业化、智能制造、产业升级、供应链升级、智慧物流、智能化、互联网、大数据、云计算、人工智能、电子商务、云平台、云服务、中国制造2025、移动互联网、数据分析、数据挖掘、智能化、信息化、网络销售"
     key_words = []
     key_words = key_words_text.split("、")    
     return key_words
-
-
-#file_affilication = open('Affiliations.txt','r')
  
 
 '''
@@ -143,19 +148,6 @@ def txt2_xls(file_path,xls_name):
         pass
 
 
-
-def test_123(pdf_file_path):
-    try:
-        text = extract_text(pdf_file_path)
-    except:
-        text = []
-        print(f"解析{pdf_file_path}文件出现异常")
-        return
-    print(text)
-    cnt = text.count("产能过剩")
-    print(cnt)
-    
-
 """
 删除无用的文件
 """
@@ -173,7 +165,7 @@ def delete_invalid_file(file_path):
 if __name__ == "__main__":        
     file_path = '/home/lawson/program/CompanyAnnualReport/result'
     xls_name = '/home/lawson/program/CompanyAnnualReport/result'
-    # anslysis_log2_xls(file_path)
+    anslysis_log2_xls(file_path)
     # file_path = './a.txt'
     # delete_invalid_file(file_path)
     txt2_xls(file_path,xls_name)
