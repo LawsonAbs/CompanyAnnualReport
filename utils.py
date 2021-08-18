@@ -170,7 +170,7 @@ def delete_invalid_file(file_path):
 
 
 if __name__ == "__main__":        
-    file_path = '/home/lawson/program/CompanyAnnualReport/analysis_2011.log'
+    file_path = '/home/lawson/program/CompanyAnnualReport/analysis_2017.log'
     xls_name = '/home/lawson/program/CompanyAnnualReport/result'
     anslysis_log2_xls(file_path)
     # file_path = './a.txt'

@@ -351,99 +351,103 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     # part_1 => 详细分析每个报表中所含关键字
-    file_path = "/home/lawson/program/CompanyAnnualReport/report/"
-    res_path = "/home/lawson/program/CompanyAnnualReport/result/"
-    year = args.year
-
-    print(f"开始分析第{year}年的数据")
-    key_word_map = {}
-    key_word_map_accumulate = {}
-    cur_path = file_path + str(year)
-    cur_res_file = res_path + str(year) +".txt"
-    cur_res_file_accumulate = res_path + str(year) +"_accumulate.txt"
-
-    #print(cur_path)
-    lists = os.listdir(cur_path)
-    for name in lists:
-        cur_file_name = cur_path +"/"+ name
-        print(cur_file_name)
-        analysis(cur_file_name,key_word_map,key_word_map_accumulate)
-        print(f"key_word_map={key_word_map}")
-        print(f"key_word_map_accumulate={key_word_map_accumulate}")
-    print(f"第{year}年的数据分析已结束")
-
-    print(f"将结果写入到文件中...")
-    # 写入非累积结果
-    with open(cur_res_file,'a') as f:
-        f.write(f"下面是第{year}年的结果")
-        for item in key_word_map.items():
-            key,value = item
-            f.write(key+"\t"+str(value)+"\n")
-        f.write("\n")
-
-    # 写入累积结果
-    with open(cur_res_file_accumulate,'a') as f:
-        f.write(f"下面是第{year}年的结果")
-        for item in key_word_map_accumulate.items():
-            key,value = item
-            f.write(key+"\t"+str(value)+"\n")
-        f.write("\n")
-
-
-    # part_2  => 分析每个报表中管理层的字数信息，以及指定部分包含的关键字
     # file_path = "/home/lawson/program/CompanyAnnualReport/report/"
     # res_path = "/home/lawson/program/CompanyAnnualReport/result/"
     # year = args.year
 
     # print(f"开始分析第{year}年的数据")
-    # word_map = {} # name => num
-    # all_key_num = [] 
-    # all_acc_key_map = [] # 所有有效分析结果文件的累计
+    # key_word_map = {}
+    # key_word_map_accumulate = {}
     # cur_path = file_path + str(year)
-    # cur_res_file = res_path + str(year) +"_part.txt"
-    
+    # cur_res_file = res_path + str(year) +".txt"
+    # cur_res_file_accumulate = res_path + str(year) +"_accumulate.txt"
 
     # #print(cur_path)
     # lists = os.listdir(cur_path)
     # for name in lists:
     #     cur_file_name = cur_path +"/"+ name
     #     print(cur_file_name)
-    #     word_num,key_num,acc_key_map = part_analysis(cur_file_name)
-    #     if word_num > 20000 or word_num < 500:
-    #         continue
-    #     word_map[name] = word_num
-    #     all_key_num.append(key_num)
-    #     all_acc_key_map.append(acc_key_map)
-
+    #     analysis(cur_file_name,key_word_map,key_word_map_accumulate)
+    #     print(f"key_word_map={key_word_map}")
+    #     print(f"key_word_map_accumulate={key_word_map_accumulate}")
     # print(f"第{year}年的数据分析已结束")
 
-    # print(f"将结果写入到xls文件中...")
+    # print(f"将结果写入到文件中...")
     # # 写入非累积结果
-    # # 直接将结果写成xls文件
-    # xls = xlwt.Workbook()
-    # xls_name = res_path + "/" + str(year) + ".xls"
+    # with open(cur_res_file,'a') as f:
+    #     f.write(f"下面是第{year}年的结果")
+    #     for item in key_word_map.items():
+    #         key,value = item
+    #         f.write(key+"\t"+str(value)+"\n")
+    #     f.write("\n")
 
-    # #生成excel的方法，声明excel
-    # sheet_name = str(year)
-    # sheet = xls.add_sheet(sheetname=sheet_name,cell_overwrite_ok=True)
+    # # 写入累积结果
+    # with open(cur_res_file_accumulate,'a') as f:
+    #     f.write(f"下面是第{year}年的结果")
+    #     for item in key_word_map_accumulate.items():
+    #         key,value = item
+    #         f.write(key+"\t"+str(value)+"\n")
+    #     f.write("\n")
+
+
+    # part_2  => 分析每个报表中管理层的字数信息，以及指定部分包含的关键字
+    file_path = "/home/lawson/program/CompanyAnnualReport/report/"
+    res_path = "/home/lawson/program/CompanyAnnualReport/result/"
+    year = args.year
+
+    print(f"开始分析第{year}年的数据")
+    word_map = {} # name => num
+    all_key_num = [] 
+    all_acc_key_map = [] # 所有有效分析结果文件的累计
+    cur_path = file_path + str(year)
+    cur_res_file = res_path + str(year) +"_part.txt"
+    
+
+    #print(cur_path)
+    lists = os.listdir(cur_path)
+    for name in lists:
+        cur_file_name = cur_path +"/"+ name
+        print(cur_file_name)
+        word_num,key_num,acc_key_map = part_analysis(cur_file_name)
+        if word_num > 20000 or word_num < 500:
+            continue
+        word_map[name] = word_num
+        all_key_num.append(key_num)
+        all_acc_key_map.append(acc_key_map)
+
+    print(f"第{year}年的数据分析已结束")
+
+    print(f"将结果写入到xls文件中...")
+    # 写入非累积结果
+    # 直接将结果写成xls文件
+    xls = xlwt.Workbook()
+    xls_name = res_path + "/" + str(year) + ".xls"
+
+    #生成excel的方法，声明excel
+    sheet_name = str(year)
+    sheet = xls.add_sheet(sheetname=sheet_name,cell_overwrite_ok=True)
     # head = ["公司名称","字数统计",'是否出现','一带一路', '供给侧', '八项规定', '利率市场化', '反腐败', '和谐社会', '国内生产总值', '国际经济','非公有制经济','国内外经济形势','宏观调控','国民经济','货币政策','通货膨胀','国际经济环境','结构性改革','中国制造“2025”','京津冀协同发展','海上丝绸之路','产能过剩','亚太自贸区','长江经济带','混合所有制经济','利率市场化','高质量发展','美丽中国','经济合作区','RCEP','碳中和','国企改革三年行动','产业升级','智能制造','数字经济']
-    # row = 0            
-    # for column in range(len(head)):
-    #     sheet.write(row,column,head[column])
+    head = ["公司名称","字数统计",'是否出现','数字化' , '数字经济' , '产业数字化' , '数字产业化' , '智能制造' , '产业升级' , 
+            '供应链升级' , '智慧物流' , '智能化' , '互联网' , 
+            '大数据' , '云计算' , '人工智能' , '电子商务' , '云平台' , '云服务' ,
+            '中国制造“2025”' , '移动互联网' , '数据分析' , '数据挖掘' , '信息化' , '网络销售' ]
+    row = 0            
+    for column in range(len(head)):
+        sheet.write(row,column,head[column])
     
-    # index = 0
-    # for item in word_map.items():
-    #     company_name,length = item            
-    #     key_num = all_key_num[index]
-    #     cur_acc_key_map = all_acc_key_map[index]
-    #     index+=1
+    index = 0
+    for item in word_map.items():
+        company_name,length = item            
+        key_num = all_key_num[index]
+        cur_acc_key_map = all_acc_key_map[index]
+        index+=1
     
-    #     row+=1   #在excel开始写的位置（y）
-    #     sheet.write(row,0,company_name)      #x单元格经度，i单元格纬度
-    #     sheet.write(row,1,length)      #x单元格经度，i单元格纬度
-    #     sheet.write(row,2,key_num)
-    #     cnt = 1
-    #     for key in head[3::]: # 写入非累计            
-    #         sheet.write(row,2+cnt,cur_acc_key_map[key])
-    #         cnt += 1
-    # xls.save(xls_name)        #保存为xls文件
+        row+=1   #在excel开始写的位置（y）
+        sheet.write(row,0,company_name)      #x单元格经度，i单元格纬度
+        sheet.write(row,1,length)      #x单元格经度，i单元格纬度
+        sheet.write(row,2,key_num)
+        cnt = 1
+        for key in head[3::]: # 写入非累计            
+            sheet.write(row,2+cnt,cur_acc_key_map[key])
+            cnt += 1
+    xls.save(xls_name)        #保存为xls文件
